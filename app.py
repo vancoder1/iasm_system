@@ -30,6 +30,7 @@ class InventoryApp:
         ttk.Button(button_frame, text="Add Product", width=22, command=self.add_product).pack(pady=4)
         ttk.Button(button_frame, text="Remove Product", width=22, command=self.remove_product).pack(pady=4)
         ttk.Button(button_frame, text="List Products", width=22, command=self.refresh_product_list).pack(pady=4)
+        ttk.Button(button_frame, text="Search Product", width=22, command=self.search_product).pack(pady=4)
         ttk.Button(button_frame, text="Sales Summary", width=22, command=self.show_summary).pack(pady=4)
         ttk.Button(button_frame, text="Sell Product", width=22, command=self.sell_product).pack(pady=4)
         ttk.Button(button_frame, text="Restock Product", width=22, command=self.restock_product).pack(pady=4)
@@ -164,6 +165,9 @@ class InventoryApp:
             self.table.delete(row)
 
         products = self.inventory_service.list_products()
+        self._render_products(products)
+
+    def _render_products(self, products: list[Product]) -> None:
         for product in products:
             self.table.insert(
                 "",
@@ -177,6 +181,24 @@ class InventoryApp:
                     self._product_extra_details(product),
                 ),
             )
+
+    def search_product(self) -> None:
+        try:
+            name_query = self._ask_required_string("Enter product name to search:")
+            products = self.inventory_service.search_products_by_name(name_query)
+
+            for row in self.table.get_children():
+                self.table.delete(row)
+            self._render_products(products)
+
+            messagebox.showinfo(
+                "Search Results",
+                f"Found {len(products)} product(s) matching '{name_query}'.",
+            )
+        except ValueError as error:
+            messagebox.showerror("Input Error", str(error))
+        except Exception as error:
+            messagebox.showerror("Error", str(error))
 
     def sell_product(self) -> None:
         try:

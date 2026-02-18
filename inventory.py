@@ -55,6 +55,17 @@ class InventoryService:
     def list_products(self) -> list[Product]:
         return self.inventory.list_all_products()
 
+    def search_products_by_name(self, name_query: str) -> list[Product]:
+        query = name_query.strip().lower()
+        if not query:
+            raise ValueError("Search text is required.")
+
+        return [
+            product
+            for product in self.inventory.list_all_products()
+            if query in product.name.lower()
+        ]
+
     def get_daily_sales_summary(self) -> tuple[float, int, int]:
         return self._db.get_daily_sales_summary()
 
