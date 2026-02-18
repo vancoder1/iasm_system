@@ -71,6 +71,21 @@ class DatabaseManager:
                 (product_id, quantity, total_amount),
             )
 
+    def get_daily_sales_summary(self) -> tuple[float, int, int]:
+        query = """
+            SELECT
+                COALESCE(SUM(total_amount), 0) AS total_sales,
+                COALESCE(SUM(quantity), 0) AS total_items,
+                COUNT(*) AS transaction_count
+            FROM Sales
+            WHERE DATE(sale_date) = DATE('now');
+        """
+
+        with self._get_connection() as connection:
+            row = connection.execute(query).fetchone()
+
+        return float(row["total_sales"]), int(row["total_items"]), int(row["transaction_count"])
+
     def fetch_all_products(self) -> list[Product]:
         query = """
             SELECT p.product_id, p.name, p.price, p.stock_quantity, p.product_type,

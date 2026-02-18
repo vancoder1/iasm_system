@@ -31,6 +31,7 @@ class InventoryApp:
         ttk.Button(button_frame, text="Remove Product", width=22, command=self.remove_product).pack(pady=4)
         ttk.Button(button_frame, text="List Products", width=22, command=self.refresh_product_list).pack(pady=4)
         ttk.Button(button_frame, text="Search Product", width=22, command=self.search_product).pack(pady=4)
+        ttk.Button(button_frame, text="Sales Summary", width=22, command=self.show_summary).pack(pady=4)
         ttk.Button(button_frame, text="Sell Product", width=22, command=self.sell_product).pack(pady=4)
         ttk.Button(button_frame, text="Restock Product", width=22, command=self.restock_product).pack(pady=4)
         ttk.Button(button_frame, text="Exit", width=22, command=self.root.quit).pack(pady=20)
@@ -225,6 +226,21 @@ class InventoryApp:
             messagebox.showinfo("Success", "Product restocked successfully.")
         except ValueError as error:
             messagebox.showerror("Input Error", str(error))
+        except Exception as error:
+            messagebox.showerror("Error", str(error))
+
+    def show_summary(self) -> None:
+        try:
+            total_sales, total_items, transaction_count = self.inventory_service.get_daily_sales_summary()
+            messagebox.showinfo(
+                "Daily Sales Summary",
+                (
+                    "Summary for today:\n"
+                    f"Transactions: {transaction_count}\n"
+                    f"Items sold: {total_items}\n"
+                    f"Total sales: ${total_sales:.2f}"
+                ),
+            )
         except Exception as error:
             messagebox.showerror("Error", str(error))
 
