@@ -55,6 +55,9 @@ class InventoryService:
     def list_products(self) -> list[Product]:
         return self.inventory.list_all_products()
 
+    def get_daily_sales_summary(self) -> tuple[float, int, int]:
+        return self._db.get_daily_sales_summary()
+
     def restock_product(self, product_id: int, quantity: int) -> Product:
         if quantity <= 0:
             raise ValueError("Restock quantity must be greater than zero.")
