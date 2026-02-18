@@ -27,3 +27,11 @@ python app.py
 ```
 
 The database is created automatically using `schema.sql` on first launch.
+
+### Implemented Features
+- Add product
+- Remove product
+- List products
+- Search products by name
+- Sell product
+- Restock product
