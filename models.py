@@ -6,12 +6,14 @@ from datetime import datetime
 
 @dataclass
 class Product:
+    """Base product type representing a generic inventory item."""
     product_id: int
     name: str
     price: float
     stock_quantity: int
 
     def __post_init__(self) -> None:
+        # enforce simple invariants after dataclass initialization
         if self.price <= 0:
             raise ValueError("Price must be greater than zero.")
         if self.stock_quantity < 0:
@@ -49,6 +51,7 @@ class Product:
 
 @dataclass
 class ElectronicsProduct(Product):
+    """Product with an additional warranty period attribute."""
     warranty_period: int
 
     def __post_init__(self) -> None:
@@ -63,6 +66,7 @@ class ElectronicsProduct(Product):
 
 @dataclass
 class PerishableProduct(Product):
+    """Product that includes an expiration date string (YYYY-MM-DD)."""
     expiration_date: str
 
     def __post_init__(self) -> None:
@@ -75,6 +79,7 @@ class PerishableProduct(Product):
 
 
 class Sale:
+    """Represents a completed sale and updates the underlying product stock."""
     def __init__(self, product: Product, quantity: int) -> None:
         if quantity <= 0:
             raise ValueError("Quantity must be greater than zero.")

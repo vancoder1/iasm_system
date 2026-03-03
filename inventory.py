@@ -4,7 +4,9 @@ from models import Product, Sale
 
 
 class Inventory:
+    """In-memory collection of Product objects keyed by ID."""
     def __init__(self) -> None:
+        # simple dict backing store; kept in sync with database by service
         self._products: dict[int, Product] = {}
 
     @property
@@ -12,6 +14,7 @@ class Inventory:
         return self._products
 
     def add_product(self, product: Product) -> None:
+        # reject duplicates by ID
         if product.product_id in self._products:
             raise ValueError(f"Product ID {product.product_id} already exists.")
         self._products[product.product_id] = product
@@ -31,12 +34,15 @@ class Inventory:
 
 
 class InventoryService:
+    """Wraps Inventory and DatabaseManager to offer application logic."""
     def __init__(self, db_manager) -> None:
         self._db = db_manager
         self.inventory = Inventory()
+        # start with whatever is already stored on disk
         self.load_from_database()
 
     def load_from_database(self) -> None:
+        # repopulate the in-memory cache from persistent storage
         self.inventory.products.clear()
         for product in self._db.fetch_all_products():
             self.inventory.add_product(product)

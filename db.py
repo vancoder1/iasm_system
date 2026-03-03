@@ -7,12 +7,15 @@ from models import ElectronicsProduct, PerishableProduct, Product
 
 
 class DatabaseManager:
+    """Encapsulates all SQLite database access and simple object mapping."""
     def __init__(self, db_path: str = "inventory.db", schema_path: str = "schema.sql") -> None:
+        # store paths and ensure the schema exists on disk
         self.db_path = Path(db_path)
         self.schema_path = Path(schema_path)
         self._initialize_database()
 
     def _get_connection(self) -> sqlite3.Connection:
+        # open a new connection each time; row_factory makes results dict-like
         connection = sqlite3.connect(self.db_path)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON;")
@@ -24,6 +27,7 @@ class DatabaseManager:
             connection.executescript(schema_sql)
 
     def insert_product(self, product: Product) -> None:
+        # add a product in the base table and any subtype-specific table
         product_type = "general"
         with self._get_connection() as connection:
             if isinstance(product, ElectronicsProduct):
@@ -51,10 +55,12 @@ class DatabaseManager:
                 )
 
     def delete_product(self, product_id: int) -> None:
+        # remove product row; ON DELETE CASCADE handles sub-tables
         with self._get_connection() as connection:
             connection.execute("DELETE FROM Products WHERE product_id = ?", (product_id,))
 
     def update_stock(self, product_id: int, stock_quantity: int) -> None:
+        # adjust inventory count for given product
         with self._get_connection() as connection:
             connection.execute(
                 "UPDATE Products SET stock_quantity = ? WHERE product_id = ?",
@@ -62,6 +68,7 @@ class DatabaseManager:
             )
 
     def insert_sale(self, product_id: int, quantity: int, total_amount: float) -> None:
+        # record a completed sale; date defaults to now
         with self._get_connection() as connection:
             connection.execute(
                 """
@@ -72,6 +79,7 @@ class DatabaseManager:
             )
 
     def get_daily_sales_summary(self) -> tuple[float, int, int]:
+        # aggregate today's sales for summary display
         query = """
             SELECT
                 COALESCE(SUM(total_amount), 0) AS total_sales,
@@ -87,6 +95,7 @@ class DatabaseManager:
         return float(row["total_sales"]), int(row["total_items"]), int(row["transaction_count"])
 
     def fetch_all_products(self) -> list[Product]:
+        # fetch all products, including subtype details via left joins
         query = """
             SELECT p.product_id, p.name, p.price, p.stock_quantity, p.product_type,
                    e.warranty_period, pe.expiration_date

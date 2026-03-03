@@ -20,13 +20,24 @@ This project implements the required Inventory and Sales Management System for C
 
 ### How to Run
 1. Open a terminal in the project folder.
-2. Run:
+2. (Optional) populate the database with some sample products by running the seeder:
+
+```bash
+python seed.py
+```
+
+   You can do this multiple times; it will silently skip products that already exist.
+
+3. Launch the GUI:
 
 ```bash
 python app.py
 ```
 
-The database is created automatically using `schema.sql` on first launch.
+The database is created automatically using `schema.sql` on first launch.  The
+application now also calls the seeder during startup, so running `seed.py`
+is only necessary if you launch the app from an empty directory and want to
+control when the examples are inserted.
 
 ### Implemented Features
 - Add product

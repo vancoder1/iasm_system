@@ -6,10 +6,14 @@ from tkinter import messagebox, simpledialog, ttk
 from db import DatabaseManager
 from inventory import InventoryService
 from models import ElectronicsProduct, PerishableProduct, Product
+from seed import seed_database  # new script that populates initial data
+# seed_database inserts a few example products; safe to call repeatedly
 
 
+# main application class wrapping the Tkinter UI and services
 class InventoryApp:
     def __init__(self, root: tk.Tk) -> None:
+        # root window supplied by caller (usually created in main())
         self.root = root
         self.root.title("Inventory and Sales Management System")
         self.root.geometry("900x450")
@@ -21,6 +25,7 @@ class InventoryApp:
         self.refresh_product_list()
 
     def _build_ui(self) -> None:
+        # construct the visual layout: buttons on left, table on right
         container = ttk.Frame(self.root, padding=12)
         container.pack(fill=tk.BOTH, expand=True)
 
@@ -63,6 +68,7 @@ class InventoryApp:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
     def _ask_required_string(self, prompt: str) -> str:
+        # helper prompting for a non-empty string, raising if cancelled
         value = simpledialog.askstring("Input", prompt, parent=self.root)
         if value is None:
             raise ValueError("Operation cancelled.")
@@ -72,12 +78,14 @@ class InventoryApp:
         return value
 
     def _ask_required_int(self, prompt: str) -> int:
+        # prompt user for integer input; error if cancelled
         value = simpledialog.askinteger("Input", prompt, parent=self.root)
         if value is None:
             raise ValueError("Operation cancelled.")
         return value
 
     def _ask_required_float(self, prompt: str) -> float:
+        # prompt and convert to float manually so we can show our own errors
         raw_value = simpledialog.askstring("Input", prompt, parent=self.root)
         if raw_value is None:
             raise ValueError("Operation cancelled.")
@@ -88,6 +96,7 @@ class InventoryApp:
 
     @staticmethod
     def _product_type(product: Product) -> str:
+        # quick type name for display based on concrete subclass
         if isinstance(product, ElectronicsProduct):
             return "Electronics"
         if isinstance(product, PerishableProduct):
@@ -96,6 +105,7 @@ class InventoryApp:
 
     @staticmethod
     def _product_extra_details(product: Product) -> str:
+        # additional info column depending on product kind
         if isinstance(product, ElectronicsProduct):
             return f"Warranty: {product.warranty_period} months"
         if isinstance(product, PerishableProduct):
@@ -246,6 +256,12 @@ class InventoryApp:
 
 
 def main() -> None:
+    # ensure database has some initial rows before launching GUI
+    try:
+        seed_database()
+    except Exception:
+        pass
+
     root = tk.Tk()
     InventoryApp(root)
     root.mainloop()
